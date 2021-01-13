@@ -9,6 +9,7 @@ import {
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
+import { VerifyEmailInput, VerifyEmailOutput } from './dtos/verify-email.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './users.service';
 
@@ -34,34 +35,27 @@ export class UserResolver {
     return authUser;
   }
 
-  @UseGuards(AuthGuard)
   @Query((returns) => UserProfileOutput)
-  async userProfile(
+  @UseGuards(AuthGuard)
+  userProfile(
     @Args() userProfileInput: UserProfileInput,
   ): Promise<UserProfileOutput> {
-    try {
-      const user = await this.usersService.findById(userProfileInput.userId);
-      if (!user) {
-        throw Error();
-      }
-      return {
-        ok: true,
-        user,
-      };
-    } catch (e) {
-      return {
-        error: 'User Not Found',
-        ok: false,
-      };
-    }
+    return this.usersService.findById(userProfileInput.userId);
   }
 
-  @UseGuards(AuthGuard)
   @Mutation((returns) => EditProfileOutput)
+  @UseGuards(AuthGuard)
   editProfile(
     @AuthUser() authUser: User,
     @Args('input') editProfileInput: EditProfileInput,
   ): Promise<EditProfileOutput> {
     return this.usersService.editProfile(authUser.id, editProfileInput);
+  }
+
+  @Mutation((returns) => VerifyEmailOutput)
+  verifyEmail(
+    @Args('input') verifyEmailInput: VerifyEmailInput,
+  ): Promise<VerifyEmailOutput> {
+    return this.usersService.verifyEmail(verifyEmailInput);
   }
 }
